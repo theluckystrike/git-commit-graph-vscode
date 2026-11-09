@@ -111,7 +111,11 @@ function hostileRepo() {
   }
   commit(d, 'a.secret', 'x\n', 'first');
   commit(d, 'a.secret', 'y\n', 'second');
-  fs.writeFileSync(path.join(d, '.gitattributes'), '*.secret diff=evil\n');
+  fs.writeFileSync(path.join(d, '.gitattributes'), '*.secret diff=evil filter=evil\n');
+  // a clean/smudge/process filter from the repository's own config runs when git hashes a changed working-tree file
+  git(d, 'config', 'filter.evil.clean', `sh -c "echo clean >> '${marker}'; cat"`);
+  git(d, 'config', 'filter.evil.smudge', `sh -c "echo smudge >> '${marker}'; cat"`);
+  git(d, 'config', 'filter.evil.process', `sh -c "echo process >> '${marker}'; exit 1"`);
   git(d, 'config', 'core.hooksPath', hooks);
   git(d, 'config', 'core.fsmonitor', `touch '${marker}'`);
   git(d, 'config', 'diff.evil.textconv', `touch '${marker}'; cat`);
@@ -147,6 +151,9 @@ test('hostile repository: no hook, fsmonitor, textconv, external diff or pager r
   // the same commands without our options do run them (proves the fixture is armed)
   git(d, 'status');
   assert.equal(fs.existsSync(marker), true, 'fixture check: plain git status runs fsmonitor');
+  fs.rmSync(marker, { force: true });
+  try { git(d, '-c', 'core.fsmonitor=false', '-c', 'core.hooksPath=/nonexistent', 'diff', '--no-ext-diff', '--no-textconv', '--name-status', 'HEAD', '--'); } catch (_) { /* process filter fails */ }
+  assert.equal(fs.existsSync(marker), true, 'fixture check: plain git diff runs the repository filter driver');
 });
 
 function linear(n, name = 'lin') {
@@ -321,6 +328,9 @@ test('commit details, compare, file history across a rename, line history and th
   assert.equal(rootDet.files[0].status, 'A');
   const cmp = await details.filesBetween('git', d, root, 'side', {});
   assert.ok(cmp.files.some(f => f.path === 'side.txt'));
+  await assert.rejects(compareBranches('git', d, '--output=' + path.join(d, 'written'), 'main'), /starts with "-"/);
+  await assert.rejects(compareBranches('git', d, 'main', '-D'), /starts with "-"/);
+  assert.equal(fs.existsSync(path.join(d, 'written..main')) || fs.existsSync(path.join(d, 'written...main')), false);
   const rep = await compareBranches('git', d, 'main', 'side');
   assert.equal(rep.ahead, 2); assert.equal(rep.behind, 0);
   const md = reportMarkdown(rep, new Date(0));

@@ -1,7 +1,7 @@
 'use strict';
 // Every action that changes the repository: it asks for what it needs, shows the exact git command in a modal
 // confirmation, runs it only after "Run", and refreshes the graph. Nothing runs without that click.
-const { runGit, display } = require('./git/runner');
+const { runGit, display, refArg: arg } = require('./git/runner');
 const { refNameProblem } = require('./git/parse');
 const rebase = require('./rebase');
 
@@ -9,33 +9,42 @@ const short = h => String(h || '').slice(0, 8);
 
 /** Plans: pure functions from inputs to the git commands (tests check them). */
 const plan = {
-  checkout: (name) => [['checkout', name, '--']],
-  checkoutDetached: (hash) => [['checkout', '--detach', hash]],
-  checkoutRemote: (local, remoteRef) => [['checkout', '-b', local, '--track', remoteRef]],
-  createBranch: (name, hash, checkout) => (checkout ? [['checkout', '-b', name, hash]] : [['branch', name, hash]]),
-  deleteBranch: (name, force) => [['branch', force ? '-D' : '-d', name]],
-  deleteRemoteBranch: (remote, branch) => [['push', remote, '--delete', branch]],
-  renameBranch: (from, to) => [['branch', '-m', from, to]],
-  createTag: (name, hash, message) => (message ? [['tag', '-a', name, '-m', message, hash]] : [['tag', name, hash]]),
-  deleteTag: (name) => [['tag', '-d', name]],
-  pushTag: (remote, name) => [['push', remote, 'refs/tags/' + name]],
-  merge: (ref, mode) => [['merge', ...(mode ? [mode] : []), ref]],
-  rebaseOnto: (ref) => [['rebase', ref]],
-  cherryPick: (hash, isMerge) => [['cherry-pick', ...(isMerge ? ['-m', '1'] : []), hash]],
-  revert: (hash, isMerge) => [['revert', '--no-edit', ...(isMerge ? ['-m', '1'] : []), hash]],
-  reset: (hash, mode) => [['reset', '--' + mode, hash]],
-  stashApply: (sel) => [['stash', 'apply', sel]],
-  stashPop: (sel) => [['stash', 'pop', sel]],
-  stashDrop: (sel) => [['stash', 'drop', sel]],
+  checkout: (name) => [['checkout', arg(name), '--']],
+  checkoutDetached: (hash) => [['checkout', '--detach', arg(hash)]],
+  checkoutRemote: (local, remoteRef) => [['checkout', '-b', arg(local), '--track', arg(remoteRef)]],
+  createBranch: (name, hash, checkout) => (checkout ? [['checkout', '-b', arg(name), arg(hash)]] : [['branch', arg(name), arg(hash)]]),
+  deleteBranch: (name, force) => [['branch', force ? '-D' : '-d', arg(name)]],
+  deleteRemoteBranch: (remote, branch) => [['push', arg(remote), '--delete', arg(branch)]],
+  renameBranch: (from, to) => [['branch', '-m', arg(from), arg(to)]],
+  createTag: (name, hash, message) => (message ? [['tag', '-a', arg(name), '-m', message, arg(hash)]] : [['tag', arg(name), arg(hash)]]),
+  deleteTag: (name) => [['tag', '-d', arg(name)]],
+  pushTag: (remote, name) => [['push', arg(remote), 'refs/tags/' + name]],
+  merge: (ref, mode) => [['merge', ...(mode ? [mode] : []), arg(ref)]],
+  rebaseOnto: (ref) => [['rebase', arg(ref)]],
+  cherryPick: (hash, isMerge) => [['cherry-pick', ...(isMerge ? ['-m', '1'] : []), arg(hash)]],
+  revert: (hash, isMerge) => [['revert', '--no-edit', ...(isMerge ? ['-m', '1'] : []), arg(hash)]],
+  reset: (hash, mode) => [['reset', '--' + mode, arg(hash)]],
+  stashApply: (sel) => [['stash', 'apply', arg(sel)]],
+  stashPop: (sel) => [['stash', 'pop', arg(sel)]],
+  stashDrop: (sel) => [['stash', 'drop', arg(sel)]],
   stashPush: (message, untracked) => [['stash', 'push', ...(untracked ? ['--include-untracked'] : []), ...(message ? ['-m', message] : [])]],
   fetchAll: (prune) => [['fetch', '--all', ...(prune ? ['--prune'] : [])]],
   pull: () => [['pull', '--ff-only']],
-  push: (remote, branch, setUpstream) => [['push', ...(setUpstream ? ['--set-upstream'] : []), remote, branch]],
-  forcePush: (remote, branch) => [['push', '--force-with-lease', remote, branch]],
+  push: (remote, branch, setUpstream) => [['push', ...(setUpstream ? ['--set-upstream'] : []), arg(remote), arg(branch)]],
+  forcePush: (remote, branch) => [['push', '--force-with-lease', arg(remote), arg(branch)]],
   abort: (op) => [[op === 'am' ? 'am' : op, '--abort']],
   cont: (op) => [[op === 'am' ? 'am' : op, '--continue']],
   skip: (op) => [[op === 'am' ? 'am' : op, '--skip']],
 };
+
+/** The part of git's error output a toast shows: the fatal/error line first (it names the file or ref), then the last lines. */
+function failureText(text) {
+  const lines = String(text || '').split('\n').map(l => l.trim()).filter(Boolean);
+  const tail = lines.slice(-3);
+  const fatal = lines.find(l => /^(fatal|error):/.test(l));
+  const parts = fatal && !tail.includes(fatal) ? [fatal, ...lines.slice(-2)] : tail;
+  return parts.join(' ').slice(0, 400);
+}
 
 function commandText(cmds) { return cmds.map(c => display(c)).join('\n'); }
 
@@ -71,7 +80,7 @@ class Actions {
     if (!res.ok) {
       const e = res.error;
       const text = (e.stderr || e.message || '').trim();
-      const msg = `${display(res.args)} failed: ${text.split('\n').filter(Boolean).slice(-3).join(' ').slice(0, 400)}`;
+      const msg = `${display(res.args)} failed: ${failureText(text)}`;
       vscode.window.showErrorMessage(msg, 'Show Output').then(c => { if (c === 'Show Output') vscode.commands.executeCommand('zovoGit.showOutput'); });
       return false;
     }
@@ -252,4 +261,4 @@ class Actions {
   }
 }
 
-module.exports = { Actions, plan, commandText };
+module.exports = { Actions, plan, commandText, failureText };

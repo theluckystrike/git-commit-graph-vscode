@@ -47,7 +47,8 @@ Measured in the real VS Code gate on a repository with 200,000 commits on 30 bra
 
 ## Safe by design
 
-- Read commands (the graph, search, details, diffs, history) run git with repository hooks, fsmonitor, external diff, textconv filters and the pager turned off, with no optional locks and no download of missing objects. Opening a repository you just cloned cannot run a program from it. The gate checks this with a repository whose hooks, fsmonitor, textconv, external diff and pager would each write a file.
+- Read commands (the graph, search, details, diffs, history) run git with repository hooks, fsmonitor, external diff, textconv filters, the pager and the clean/smudge filters from the repository's own config turned off, with no optional locks and no download of missing objects. Opening a repository you just cloned cannot run a program from it. The gate checks this with a repository whose hooks, fsmonitor, textconv, external diff, pager and filters would each write a file.
+- A branch, tag or remote whose name starts with "-" (git would read it as an option) is refused with a message. Nothing runs.
 - Write commands run only after your click in a confirmation that shows the command, and behave like the same command in a terminal (your hooks run, as they would there).
 - The extension waits until you trust the folder (Restricted Mode).
 - It stores no credentials and has no telemetry.

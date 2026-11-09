@@ -7,7 +7,7 @@ const { Layout, CHECKPOINT } = require('../src/graph/layout');
 const { Store } = require('../src/graph/store');
 const { rewrite } = require('../src/seqedit');
 const rebase = require('../src/rebase');
-const { plan, commandText } = require('../src/actions');
+const { plan, commandText, failureText } = require('../src/actions');
 const { display, quoteArg } = require('../src/git/runner');
 
 const H = i => i.toString(16).padStart(40, '0');
@@ -230,4 +230,26 @@ test('action plans are the git commands a user would type, with -- where a name 
   assert.equal(commandText(plan.createTag('v1', 'abc', "it's done")), "git tag -a v1 -m 'it'\\''s done' abc");
   assert.equal(display(['log', 'a b']), "git log 'a b'");
   assert.equal(quoteArg('feature/ü'), "'feature/ü'");
+});
+
+test('refs and remotes whose names start with "-" are refused, never passed to git as options', () => {
+  for (const bad of ['-D', '--exec=touch x', '--upload-pack=x', '-c', '--output=/tmp/x']) {
+    for (const fn of [() => plan.checkout(bad), () => plan.deleteBranch(bad, false), () => plan.deleteBranch(bad, true), () => plan.merge(bad), () => plan.rebaseOnto(bad),
+      () => plan.renameBranch(bad, 'ok'), () => plan.deleteTag(bad), () => plan.checkoutRemote('ok', bad), () => plan.checkoutRemote(bad, 'origin/x'),
+      () => plan.push(bad, 'main'), () => plan.push('origin', bad), () => plan.forcePush('origin', bad), () => plan.deleteRemoteBranch(bad, 'x'),
+      () => plan.deleteRemoteBranch('origin', bad), () => plan.pushTag(bad, 'v1'), () => plan.stashDrop(bad), () => plan.reset(bad, 'hard')]) {
+      assert.throws(fn, e => e.optionLike === true && /starts with "-"/.test(e.message), bad);
+    }
+  }
+  assert.deepEqual(plan.checkout('feature/-x'), [['checkout', 'feature/-x', '--']]);
+  assert.deepEqual(plan.deleteBranch('a-b', true), [['branch', '-D', 'a-b']]);
+});
+
+test('a failed command shows git\'s fatal line (the file it names) and the last lines', () => {
+  const lock = "fatal: Unable to create '/r/.git/index.lock': File exists.\n\nAnother git process seems to be running in this repository, e.g.\nan editor opened by 'git commit'. Please make sure all processes\nare terminated then try again. If it still fails, a git process\nmay have crashed in this repository earlier:\nremove the file manually to continue.";
+  const t = failureText(lock);
+  assert.match(t, /^fatal: Unable to create '\/r\/\.git\/index\.lock': File exists\./);
+  assert.match(t, /remove the file manually to continue\.$/);
+  assert.equal(failureText('error: pathspec x did not match'), 'error: pathspec x did not match');
+  assert.equal(failureText('a\nb\nc\nd'), 'b c d');
 });

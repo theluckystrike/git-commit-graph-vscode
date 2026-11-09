@@ -1,7 +1,7 @@
 'use strict';
 // Branch comparison report (Pro candidate): ahead and behind counts, the merge base, the commits on each side, the
 // changed files and the authors, as a Markdown document. Read-only git commands.
-const { runGit } = require('./git/runner');
+const { runGit, refArg } = require('./git/runner');
 const P = require('./git/parse');
 
 const MAX_COMMITS = 500;
@@ -12,6 +12,7 @@ async function logSide(git, cwd, range) {
 }
 
 async function compareBranches(git, cwd, a, b) {
+  refArg(a); refArg(b);
   const [base, counts, left, right, ns, short] = await Promise.all([
     runGit(git, ['merge-base', a, b], { cwd, okCodes: [0, 1] }).then(r => r.stdout.trim()),
     runGit(git, ['rev-list', '--left-right', '--count', `${a}...${b}`, '--'], { cwd, timeoutMs: 120000 }).then(r => r.stdout.trim().split(/\s+/).map(Number)),

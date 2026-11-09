@@ -252,6 +252,14 @@ class GraphPanel {
   }
 
   async runAction(m) {
+    try { return await this.runActionInner(m); } catch (e) {
+      // a ref whose name starts with "-" would be read by git as an option: refuse with a message instead of running it
+      if (e && e.optionLike) { this.vscode.window.showWarningMessage(e.message); return undefined; }
+      throw e;
+    }
+  }
+
+  async runActionInner(m) {
     const A = this.d.actions;
     const repo = this.repo;
     const st = m.state || {};
