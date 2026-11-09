@@ -1,0 +1,20 @@
+html, body { height: 100%; }
+body { margin: 0; display: flex; flex-direction: column; color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); }
+#app { flex: 1; overflow: auto; }
+h1 { font-size: 14px; margin: 0; padding: 10px 12px 4px; font-weight: 600; }
+.sub { padding: 0 12px 8px; color: var(--vscode-descriptionForeground); font-size: 12px; border-bottom: 1px solid var(--vscode-panel-border, rgba(128,128,128,.3)); }
+.item { padding: 6px 12px; border-bottom: 1px solid var(--vscode-panel-border, rgba(128,128,128,.15)); cursor: pointer; }
+.item:hover, .item:focus { background: var(--vscode-list-hoverBackground); outline: none; }
+.top { display: flex; gap: 10px; align-items: baseline; }
+.top .s { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.meta { color: var(--vscode-descriptionForeground); font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+.h { font-family: var(--vscode-editor-font-family); }
+.st { font-weight: 600; font-family: var(--vscode-editor-font-family); }
+.acts { display: inline-flex; gap: 4px; }
+.acts button { font: inherit; font-size: 11px; padding: 0 6px; color: var(--vscode-button-secondaryForeground, var(--vscode-foreground)); background: var(--vscode-button-secondaryBackground, rgba(128,128,128,.15)); border: 1px solid transparent; border-radius: 2px; cursor: pointer; }
+pre.patch { margin: 6px 0 0; padding: 6px 8px; font-family: var(--vscode-editor-font-family); font-size: 12px; background: var(--vscode-textCodeBlock-background, rgba(128,128,128,.08)); overflow-x: auto; white-space: pre; border-radius: 3px; }
+pre.patch .add { color: var(--vscode-gitDecoration-addedResourceForeground, #81b88b); }
+pre.patch .del { color: var(--vscode-gitDecoration-deletedResourceForeground, #c74e39); }
+pre.patch .hunk { color: var(--vscode-descriptionForeground); }
+.msg { padding: 20px 12px; color: var(--vscode-descriptionForeground); white-space: pre-wrap; }
+.more { margin: 10px 12px; }

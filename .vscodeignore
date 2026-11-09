@@ -1,0 +1,12 @@
+test/**
+scripts/**
+node_modules/**
+images/shot-*.png
+images/gate-*.png
+**/*.map
+icon.svg
+.gitignore
+.github/**
+dist/**
+*.vsix
+package-lock.json

@@ -1,0 +1,384 @@
+{
+  "name": "zovo-git-commit-graph",
+  "displayName": "Git Commit Graph & History Log (Branches, Compare, Blame)",
+  "description": "Free git commit graph and history log for VS Code: every branch, tag, remote and stash as a graph that opens 200,000 commits in about a second, search across the full history (message, author, hash, file path, changed text), compare any two commits, file and line history, and checkout, merge, rebase, cherry-pick, revert, reset and squash with the exact git command shown first. No sign-in, no network of its own.",
+  "version": "0.1.0",
+  "publisher": "zovo",
+  "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1B1F2E",
+    "theme": "dark"
+  },
+  "engines": {
+    "vscode": "^1.90.0",
+    "node": ">=18"
+  },
+  "categories": [
+    "SCM Providers",
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "git",
+    "git log",
+    "git graph",
+    "git history",
+    "git tree",
+    "commit graph",
+    "branch graph",
+    "git branches",
+    "history",
+    "log",
+    "commit",
+    "squash",
+    "rebase",
+    "cherry-pick",
+    "compare commits",
+    "file history",
+    "line history",
+    "blame",
+    "offline",
+    "free"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "workspaceContains:.git",
+    "workspaceContains:*/.git",
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "Commit Graph runs git in the workspace. It waits until you trust the folder."
+    },
+    "virtualWorkspaces": false
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "zovoGit.showGraph",
+        "title": "Show Commit Graph",
+        "category": "Commit Graph",
+        "icon": "$(git-commit)"
+      },
+      {
+        "command": "zovoGit.fileHistory",
+        "title": "Show File History",
+        "category": "Commit Graph",
+        "icon": "$(history)"
+      },
+      {
+        "command": "zovoGit.lineHistory",
+        "title": "Show Line History for Selection",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.searchHistory",
+        "title": "Search All History",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.goToCommit",
+        "title": "Go to Commit...",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.compareBranches",
+        "title": "Compare Branches (Report)...",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.interactiveRebase",
+        "title": "Interactive Rebase...",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.refreshRepositories",
+        "title": "Find Repositories Again",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.showOutput",
+        "title": "Show Log",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.supportDeveloper",
+        "title": "Support the developer",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.moreViewers",
+        "title": "More free tools by Zovo",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.unlockWithSponsors",
+        "title": "Unlock Zovo Pro with GitHub Sponsors",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.enterLicenseKey",
+        "title": "Enter Zovo Pro License Key",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.getPro",
+        "title": "Get Zovo Pro (USD 19 once, all Zovo tools)",
+        "category": "Commit Graph"
+      },
+      {
+        "command": "zovoGit.removeLicense",
+        "title": "Remove Zovo Pro License",
+        "category": "Commit Graph"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "zovoGit.unlockWithSponsors",
+          "when": "zovoGit.proEnabled"
+        },
+        {
+          "command": "zovoGit.enterLicenseKey",
+          "when": "zovoGit.proEnabled"
+        },
+        {
+          "command": "zovoGit.getPro",
+          "when": "zovoGit.proEnabled"
+        },
+        {
+          "command": "zovoGit.removeLicense",
+          "when": "zovoGit.proEnabled"
+        },
+        {
+          "command": "zovoGit.lineHistory",
+          "when": "editorIsOpen && resourceScheme == file"
+        },
+        {
+          "command": "zovoGit.fileHistory",
+          "when": "resourceScheme == file"
+        }
+      ],
+      "scm/title": [
+        {
+          "command": "zovoGit.showGraph",
+          "group": "navigation@9",
+          "when": "scmProvider == git"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "zovoGit.showGraph",
+          "group": "navigation@90",
+          "when": "zovoGit.hasRepo && config.zovoGit.showEditorTitleButton"
+        }
+      ],
+      "editor/title/context": [
+        {
+          "command": "zovoGit.fileHistory",
+          "group": "zovoGit@1",
+          "when": "resourceScheme == file && zovoGit.hasRepo"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "zovoGit.fileHistory",
+          "group": "zovoGit@1",
+          "when": "zovoGit.hasRepo && !explorerResourceIsFolder"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "zovoGit.fileHistory",
+          "group": "zovoGit@1",
+          "when": "resourceScheme == file && zovoGit.hasRepo"
+        },
+        {
+          "command": "zovoGit.lineHistory",
+          "group": "zovoGit@2",
+          "when": "resourceScheme == file && zovoGit.hasRepo"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Commit Graph",
+      "properties": {
+        "zovoGit.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "Full path of the git program. Empty: VS Code's git, then `git` on the PATH."
+        },
+        "zovoGit.graph.order": {
+          "type": "string",
+          "enum": [
+            "date",
+            "topo"
+          ],
+          "default": "date",
+          "enumDescriptions": [
+            "Newest commits first (git log --date-order)",
+            "Keep each branch's commits together (git log --topo-order)"
+          ],
+          "description": "Order of the commits in the graph."
+        },
+        "zovoGit.graph.maxCommits": {
+          "type": "number",
+          "default": 500000,
+          "minimum": 1000,
+          "maximum": 5000000,
+          "description": "Most commits read into the graph. Searches by file path and changed text always run over the full history."
+        },
+        "zovoGit.graph.showRemoteBranches": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show remote branches."
+        },
+        "zovoGit.graph.showTags": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show tags."
+        },
+        "zovoGit.graph.showStashes": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show stashes next to the commit they were made on."
+        },
+        "zovoGit.graph.showUncommittedChanges": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a row for uncommitted changes on top of HEAD."
+        },
+        "zovoGit.dateFormat": {
+          "type": "string",
+          "enum": [
+            "locale",
+            "iso",
+            "relative"
+          ],
+          "default": "locale",
+          "description": "How dates are shown."
+        },
+        "zovoGit.maxFileMB": {
+          "type": "number",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 2048,
+          "description": "Files larger than this (at a commit) are not loaded into diffs; a short note shows instead."
+        },
+        "zovoGit.maxFilesInDetails": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 100,
+          "maximum": 100000,
+          "description": "Most changed files listed for one commit or comparison."
+        },
+        "zovoGit.detectDepth": {
+          "type": "number",
+          "default": 2,
+          "minimum": 0,
+          "maximum": 6,
+          "description": "How many folder levels below each workspace folder are searched for nested repositories."
+        },
+        "zovoGit.statusTimeoutSec": {
+          "type": "number",
+          "default": 15,
+          "minimum": 2,
+          "maximum": 600,
+          "description": "Time limit for git status when building the uncommitted-changes row."
+        },
+        "zovoGit.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Graph button in the status bar."
+        },
+        "zovoGit.showEditorTitleButton": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show the graph button in the editor title bar."
+        },
+        "zovoGit.showSupportLinks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the small Rate, More free tools, Sponsor and PayPal links at the bottom of the graph."
+        },
+        "zovoGit.askForRating": {
+          "type": "boolean",
+          "default": true,
+          "description": "Ask for a Marketplace rating at most twice, after the graph worked for you on two different days."
+        }
+      }
+    },
+    "walkthroughs": [
+      {
+        "id": "zovoGit.start",
+        "title": "Get started with Commit Graph",
+        "description": "The history of your repository as a graph, with search, compare and safe git actions.",
+        "steps": [
+          {
+            "id": "graph",
+            "title": "Open the graph",
+            "description": "Every branch, tag, remote and stash. Click a commit for its files; click a file for the diff.\n[Show Commit Graph](command:zovoGit.showGraph)",
+            "media": {
+              "markdown": "walkthrough/graph.md"
+            },
+            "completionEvents": [
+              "onCommand:zovoGit.showGraph"
+            ]
+          },
+          {
+            "id": "search",
+            "title": "Search all history",
+            "description": "Search messages, authors and hashes, or the commits that touched a path or changed a piece of text. It covers the whole history, not only the rows on screen.\n[Search All History](command:zovoGit.searchHistory)",
+            "media": {
+              "markdown": "walkthrough/search.md"
+            },
+            "completionEvents": [
+              "onCommand:zovoGit.searchHistory"
+            ]
+          },
+          {
+            "id": "actions",
+            "title": "Squash, rebase and more, safely",
+            "description": "Right-click a commit or a branch. Every action shows the exact git command and asks before it runs. Shift+click a second commit to squash a range.",
+            "media": {
+              "markdown": "walkthrough/actions.md"
+            }
+          },
+          {
+            "id": "history",
+            "title": "File and line history",
+            "description": "Right-click in an editor: Show File History follows renames; Show Line History shows how the selected lines changed.\n[Show File History](command:zovoGit.fileHistory)",
+            "media": {
+              "markdown": "walkthrough/history.md"
+            },
+            "completionEvents": [
+              "onCommand:zovoGit.fileHistory",
+              "onCommand:zovoGit.lineHistory"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "package": "npx -y @vscode/vsce@3 package --no-dependencies --no-gitHubIssueLinking -o dist/"
+  },
+  "devDependencies": {
+    "@types/vscode": "~1.90.0"
+  },
+  "homepage": "https://github.com/theluckystrike/git-commit-graph-vscode#readme",
+  "bugs": {
+    "url": "https://github.com/theluckystrike/git-commit-graph-vscode/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/theluckystrike/git-commit-graph-vscode"
+  },
+  "sponsor": {
+    "url": "https://github.com/sponsors/theluckystrike"
+  }
+}

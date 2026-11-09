@@ -1,0 +1,21 @@
+html, body { height: 100%; }
+body { margin: 0; display: flex; flex-direction: column; color: var(--vscode-foreground); background: var(--vscode-editor-background); font-family: var(--vscode-font-family); font-size: var(--vscode-font-size); }
+#app { flex: 1; overflow: auto; padding: 10px 12px; }
+h1 { font-size: 14px; margin: 0 0 4px; }
+.sub { color: var(--vscode-descriptionForeground); font-size: 12px; margin-bottom: 10px; }
+.list { border: 1px solid var(--vscode-panel-border, rgba(128,128,128,.3)); border-radius: 3px; }
+.it { display: grid; grid-template-columns: 22px 110px 80px 1fr; gap: 8px; align-items: center; padding: 4px 8px; border-bottom: 1px solid var(--vscode-panel-border, rgba(128,128,128,.15)); background: var(--vscode-editor-background); }
+.it:last-child { border-bottom: none; }
+.it.drag { opacity: .4; }
+.it.over { box-shadow: inset 0 2px 0 var(--vscode-focusBorder); }
+.it.drop .s { text-decoration: line-through; opacity: .6; }
+.it.squash, .it.fixup { padding-left: 24px; }
+.handle { cursor: grab; opacity: .7; user-select: none; text-align: center; }
+.h { font-family: var(--vscode-editor-font-family); opacity: .85; }
+.s { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+select, textarea { background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border, transparent); font: inherit; }
+textarea { grid-column: 2 / 5; width: 100%; box-sizing: border-box; min-height: 52px; font-family: var(--vscode-editor-font-family); font-size: 12px; }
+.bar { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+.bar .err { color: var(--vscode-errorForeground); }
+button { font: inherit; padding: 4px 10px; border: 1px solid transparent; border-radius: 2px; cursor: pointer; color: var(--vscode-button-secondaryForeground, var(--vscode-foreground)); background: var(--vscode-button-secondaryBackground, rgba(128,128,128,.15)); }
+button.primary { color: var(--vscode-button-foreground); background: var(--vscode-button-background); }
